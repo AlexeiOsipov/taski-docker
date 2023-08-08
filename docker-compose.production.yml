@@ -1,0 +1,33 @@
+version: '3'
+
+volumes:
+  pg_data:
+  static:
+
+services:
+  db:
+    image: postgres:13.10
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+  backend:
+    image: misterjov/taski_backend
+    env_file: .env
+    depends_on:
+      - db
+    volumes:
+      - static:/backend_static
+  frontend:
+    env_file: .env
+    image: misterjov/taski_frontend
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - static:/frontend_static
+  gateway:
+    image: misterjov/taski_gateway
+    ports:
+      - 8000:80
+    volumes:
+      - static:/staticfiles/
+    depends_on:
+      - backend
